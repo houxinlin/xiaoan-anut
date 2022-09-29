@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:paddingLeft="10dp"
+            android:textSize="25sp"
+            android:id="@+id/tv_month"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"></TextView>
+        <TextView
+            android:textStyle="bold"
+            android:text="小安"
+            android:padding="10pt"
+            android:textSize="23sp"
+            android:id="@+id/tv_tip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></TextView>
+    </LinearLayout>
+    <com.haibin.calendarview.CalendarView
+        android:background="#fff"
+        app:current_month_lunar_text_color="#CFCFCF"
+        app:current_month_text_color="#4f4f4f"
+        app:day_text_size="18sp"
+        app:max_select_range="-1"
+        app:min_select_range="-1"
+        app:min_year="2004"
+        app:month_view_show_mode="mode_only_current"
+        app:other_month_text_color="#e1e1e1"
+        app:scheme_text_color="#333"
+        app:scheme_theme_color="#333"
+        app:selected_text_color="#fff"
+        app:selected_theme_color="#000000"
+        app:week_background="#fff"
+        app:week_text_color="#111"
+        app:year_view_day_text_color="#333333"
+        app:year_view_day_text_size="9sp"
+        app:year_view_month_text_color="#ff0000"
+        app:year_view_month_text_size="20sp"
+        app:year_view_scheme_color="#000000"
+        android:id="@+id/calendarview"
+        app:select_mode="multi_mode"
+        app:month_view="com.ajl.xiaoan.CustomMultiMonthView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </com.haibin.calendarview.CalendarView>
+
+</LinearLayout>
