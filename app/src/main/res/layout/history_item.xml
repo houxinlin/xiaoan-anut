@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:minHeight="60dp"
+    android:layout_width="match_parent"
+
+    android:layout_height="60dp">
+
+    <TextView
+        android:id="@+id/tv_start"
+        android:gravity="center"
+        android:text=""
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent">
+
+    </TextView>
+    <TextView
+        android:id="@+id/tv_day"
+        android:gravity="center"
+        android:text=""
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent">
+
+    </TextView>
+    <TextView
+        android:id="@+id/tv_interval"
+        android:gravity="center"
+        android:text=""
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent">
+
+    </TextView>
+</LinearLayout>
