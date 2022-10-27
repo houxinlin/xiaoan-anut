@@ -30,7 +30,7 @@
         android:background="#fff"
         app:current_month_lunar_text_color="#CFCFCF"
         app:current_month_text_color="#4f4f4f"
-        app:day_text_size="18sp"
+        app:day_text_size="14sp"
         app:max_select_range="-1"
         app:min_select_range="-1"
         app:min_year="2004"
@@ -46,12 +46,13 @@
         app:year_view_day_text_size="9sp"
         app:year_view_month_text_color="#ff0000"
         app:year_view_month_text_size="20sp"
-        app:year_view_scheme_color="#000000"
+        app:year_view_scheme_color="#FFFFFF"
         android:id="@+id/calendarview"
         app:select_mode="multi_mode"
         app:month_view="com.ajl.xiaoan.CustomMultiMonthView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_weight="1.2"
+        android:layout_height="0dp">
 
     </com.haibin.calendarview.CalendarView>
     <LinearLayout
@@ -60,14 +61,11 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
-        <include
-            layout="@layout/listview_header">
-        </include>
         <ListView
+            android:divider="@null"
             android:id="@+id/listview"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
         </ListView>
     </LinearLayout>
 

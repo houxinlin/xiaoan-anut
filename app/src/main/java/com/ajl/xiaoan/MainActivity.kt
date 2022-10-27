@@ -10,20 +10,17 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.ContentLoadingProgressBar
 import com.ajl.xiaoan.gson.GsonUtils
-import com.ajl.xiaoan.gson.LocalDateDeserializer
-import com.ajl.xiaoan.gson.LocalDateSerializer
-import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.haibin.calendarview.Calendar
 import com.haibin.calendarview.CalendarView
 import okhttp3.*
 import java.io.IOException
-import java.text.MessageFormat
 import java.time.LocalDate
 import java.time.Period
 import java.time.temporal.ChronoUnit
+import java.util.*
+import kotlin.collections.HashMap
 import kotlin.math.absoluteValue
 
 
@@ -31,12 +28,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mCalendarView: CalendarView
     private lateinit var mTipTextView: TextView
     private lateinit var mMonthTextView: TextView
-    private lateinit var listView:ListView
+    private lateinit var listView: ListView
     private val okHttpClient = OkHttpClient.Builder().build()
     private lateinit var calendar: Calendar
     private var auntDayList: MutableList<AuntDay> = mutableListOf()
     private var dialogSelectCallback: () -> Unit = {}
     private lateinit var loadingProgressBar: ProgressDialog
+    private val schemeMap = mutableMapOf<String, Calendar>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -44,13 +43,13 @@ class MainActivity : AppCompatActivity() {
         mTipTextView = findViewById(R.id.tv_tip)
         mMonthTextView = findViewById(R.id.tv_month)
 
-        listView=findViewById(R.id.listview)
+        listView = findViewById(R.id.listview)
         loadingProgressBar = ProgressDialog(this)
         loadingProgressBar.setTitle("数据同步中")
 
         mMonthTextView.text = "${mCalendarView.curMonth}月"
 
-        mCalendarView.setOnMonthChangeListener { year, month ->
+        mCalendarView.setOnMonthChangeListener { _, month ->
             mMonthTextView.text = "${month}月"
         }
         mCalendarView.setOnCalendarMultiSelectListener(object :
@@ -63,15 +62,22 @@ class MainActivity : AppCompatActivity() {
 
             override fun onCalendarMultiSelect(calendar: Calendar?, curSize: Int, maxSize: Int) {
                 //如果单击后已被选中
-                if (mCalendarView.multiSelectCalendars.contains(calendar)) {
-                    this@MainActivity.calendar = calendar!!
-                    showTypeSelectDialog()
-                    return
-                }
+                this@MainActivity.calendar = calendar!!
                 //取消选中
                 refresh(this@MainActivity.auntDayList)
+                showTypeSelectDialog()
             }
         })
+        val localDate = LocalDate.now()
+        var scheme = getSchemeCalendar(
+            localDate.year,
+            localDate.monthValue,
+            localDate.dayOfMonth,
+            Color.RED,
+            "今"
+        )
+        schemeMap[scheme.toString()] = scheme
+        mCalendarView.setSchemeDate(this.schemeMap)
         refreshFromServer()
     }
 
@@ -131,7 +137,6 @@ class MainActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call, response: Response) {
                 var string = response.body!!.string()
-
                 runOnUiThread {
                     loadingProgressBar.hide()
                     callback.success(string)
@@ -140,31 +145,43 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun refresh(data: MutableList<AuntDay>) {
-        mCalendarView.removeMultiSelect(*mCalendarView.multiSelectCalendars.toTypedArray())
-        data.forEach(this::addDay)
-        auntDayList = data
+    private fun refreshVirtualDay() {
+        val startAuntDay = this.auntDayList.find { it.endDay == null } ?: return
+        var eachDataDay =LocalDate.now()
+        var total =1
+        while (!(startAuntDay!!.startDay!!.isEqual(eachDataDay)) && startAuntDay.startDay!!.isBefore(eachDataDay)){
+            this.mCalendarView.putMultiSelect(eachDataDay.toCalendar())
+            eachDataDay=eachDataDay.minusDays(1)
+            total+=1
+        }
+        mTipTextView.text = "今天是第${total}天"
+    }
 
+    private fun refresh(data: MutableList<AuntDay>) {
+        this.mCalendarView.removeMultiSelect(*mCalendarView.multiSelectCalendars.toTypedArray())
+        data.forEach(this::addDay)
+        this.auntDayList = data
+        refreshVirtualDay()
         var transform: (AuntDay) -> HistoryBean = {
             HistoryBean().apply {
                 this.startDate = it.startDay
-                if (it.endDay!=null){
-                    this.day =ChronoUnit.DAYS.between(it.startDay,it.endDay).toInt()+1
+                if (it.endDay != null) {
+                    this.day = ChronoUnit.DAYS.between(it.startDay, it.endDay).toInt() + 1
                 }
             }
         }
-        var list = auntDayList.map(transform)
-        list= list.reversed()
-
-        for(i in 0 until list.size-1){
-            list[i].interval =ChronoUnit.DAYS.between(list[i].startDate,list[i+1].startDate).toInt().absoluteValue
+        var list = this.auntDayList.map(transform)
+        list = list.reversed()
+        for (i in 0 until list.size - 1) {
+            list[i].interval = ChronoUnit.DAYS.between(list[i].startDate, list[i + 1].startDate)
+                .toInt().absoluteValue
         }
-        listView.adapter =HistoryAdapter(list,this)
+        listView.adapter = HistoryAdapter(list, this)
+
         //需不需要显示下一次生理期时间
-        for (auntDay in auntDayList) {
+        for (auntDay in this.auntDayList) {
             if (auntDay.endDay == null) return
         }
-
         getNextAuntDay()
     }
 
@@ -255,25 +272,16 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        log("sum=${intervals.sum()}")
         //获取平均值
         val avg = if (auntDayList.size == 1) 27 else intervals.average().toInt()
 
         //显示scheme
-        val map: MutableMap<String, Calendar> = HashMap()
         var endDay = auntDayList.last().endDay!!.plusDays(avg.toLong())
-        map[getSchemeCalendar(
-            endDay.year,
-            endDay.monthValue,
-            endDay.dayOfMonth,
-            Color.RED,
-            "预期"
-        ).toString()] =
-            getSchemeCalendar(endDay.year, endDay.monthValue, endDay.dayOfMonth, Color.RED, "预期")
-
-        mCalendarView.setSchemeDate(map)
+        val schemeValue =
+            getSchemeCalendar(endDay.year, endDay.monthValue, endDay.dayOfMonth, Color.RED, "预")
+        this.schemeMap[schemeValue.toString()] = schemeValue
+        mCalendarView.setSchemeDate(this.schemeMap)
         val nextDayInterval = ChronoUnit.DAYS.between(LocalDate.now(), endDay).absoluteValue
-
         mTipTextView.text = "距离下次生理期还剩${nextDayInterval}天！"
 
     }
@@ -335,17 +343,31 @@ class MainActivity : AppCompatActivity() {
         return calendar
     }
 
-    fun Int.fillZero(): String {
+    private fun Int.fillZero(): String {
         return String.format("%02d", this)
     }
 
-    fun Calendar.toLocalDate(): LocalDate {
+    private fun Calendar.toLocalDate(): LocalDate {
         return LocalDate.of(this.year, this.month, this.day)
     }
 
-    fun Calendar.toStringDate(): String {
+    private fun Calendar.toStringDate(): String {
         return "${this.year}-${this.month.fillZero()}-${this.day.fillZero()}"
     }
+    private fun LocalDate.toCalendar():Calendar{
+        return Calendar().apply {
+            this.day =this@toCalendar.dayOfMonth
+            this.month =this@toCalendar.monthValue
+            this.year =this@toCalendar.year
+        }
+    }
 
+    fun getScheme(): Map<String, Calendar> {
+        return this.schemeMap
+    }
+
+    private fun createSchemeKey(): String {
+        return UUID.randomUUID().toString()
+    }
 
 }

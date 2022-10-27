@@ -7,6 +7,8 @@ import android.graphics.Paint
 import android.util.Log
 import com.haibin.calendarview.Calendar
 import com.haibin.calendarview.MultiMonthView
+import java.time.LocalDate
+import kotlin.math.log
 
 class CustomMultiMonthView(context: Context?) : MultiMonthView(context) {
     private var mRadius = 0
@@ -33,10 +35,10 @@ class CustomMultiMonthView(context: Context?) : MultiMonthView(context) {
         canvas: Canvas, calendar: Calendar, x: Int, y: Int, hasScheme: Boolean,
         isSelectedPre: Boolean, isSelectedNext: Boolean
     ): Boolean {
-        val tempColor = mSelectedPaint.color
-        mSelectedPaint.color = (context as MainActivity).getSelectColor(calendar)
         val cx = x + mItemWidth / 2
         val cy = y + mItemHeight / 2
+        mSelectedPaint.color= context.getColor(R.color.selectColor)
+
         if (isSelectedPre) {
             if (isSelectedNext) {
                 canvas.drawRect(
@@ -68,7 +70,6 @@ class CustomMultiMonthView(context: Context?) : MultiMonthView(context) {
             }
             canvas.drawCircle(cx.toFloat(), cy.toFloat(), mRadius.toFloat(), mSelectedPaint)
         }
-        mSelectedPaint.color = tempColor
         return false
     }
 
@@ -79,44 +80,45 @@ class CustomMultiMonthView(context: Context?) : MultiMonthView(context) {
         y: Int,
         isSelected: Boolean
     ) {
+
+        Log.i("TAG", "onDrawScheme: $calendar")
         val cx = x + mItemWidth / 2
         val cy = y + mItemHeight / 2
         canvas.drawCircle(cx.toFloat(), cy.toFloat(), mRadius.toFloat(), mExpectSolidPaint)
     }
 
-    override fun onDrawText(
-        canvas: Canvas,
-        calendar: Calendar,
-        x: Int,
-        y: Int,
-        hasScheme: Boolean,
-        isSelected: Boolean
-    ) {
+    override fun onDrawText(canvas: Canvas, calendar: Calendar, x: Int, y: Int, hasScheme: Boolean, isSelected: Boolean) {
         val baselineY = mTextBaseLine + y
-        val cx = x + mItemWidth / 2 -(mTextTipPaint.measureText("始")/2)
+        var cx = (x + mItemWidth / 2).toFloat()
         val isInRange = isInRange(calendar)
         val isEnable = !onCalendarIntercept(calendar)
         if (isSelected) {
+            cx -= (mTextTipPaint.measureText("始") / 2)
             if ((context as MainActivity).isStartDay(calendar)) {
                 canvas.drawText("始", cx, baselineY, mTextTipPaint)
             } else if ((context as MainActivity).isEndDay(calendar)) {
                 canvas.drawText("终", cx, baselineY, mTextTipPaint)
-            }else{
-                canvas.drawText(calendar.day.toString(), cx.toFloat(), baselineY, mSelectTextPaint)
+            } else {
+                canvas.drawText(calendar.day.toString(), cx, baselineY, mSelectTextPaint)
             }
 
         } else if (hasScheme) {
-            canvas.drawText(
-                calendar.day.toString(),
-                cx.toFloat(),
-                baselineY,
-                if (calendar.isCurrentDay) mCurDayTextPaint else if (calendar.isCurrentMonth && isInRange && isEnable) mSchemeTextPaint else mOtherMonthTextPaint
-            )
+            val scheme = (context as MainActivity).getScheme()
+            val schemeCalendar = scheme[calendar.toString()]!!
+            val paint = if (calendar.isCurrentDay) mCurDayTextPaint
+            else if (calendar.isCurrentMonth && isInRange && isEnable) mSchemeTextPaint
+            else mOtherMonthTextPaint
+            paint.color = Color.WHITE
+            canvas.drawText(schemeCalendar.scheme, cx, baselineY, paint)
+        } else if (calendar.isCurrentDay) {
+            Log.i("TAG", "onDrawText: 今天")
+            canvas.drawText("今", cx, baselineY, mCurDayTextPaint)
         } else {
-            canvas.drawText(
-                calendar.day.toString(), cx.toFloat(), baselineY,
-                if (calendar.isCurrentDay) mCurDayTextPaint else if (calendar.isCurrentMonth && isInRange && isEnable) mCurMonthTextPaint else mOtherMonthTextPaint
-            )
+            val paint = if (calendar.isCurrentDay) mCurDayTextPaint
+            else if (calendar.isCurrentMonth && isInRange && isEnable) mCurMonthTextPaint
+            else mOtherMonthTextPaint
+            canvas.drawText(calendar.day.toString(), cx, baselineY, paint)
         }
     }
+
 }

@@ -4,33 +4,56 @@
     android:minHeight="60dp"
     android:layout_width="match_parent"
 
-    android:layout_height="60dp">
+    android:layout_height="50dp">
 
     <TextView
+        android:layout_marginLeft="10dp"
         android:id="@+id/tv_start"
-        android:gravity="center"
+        android:gravity="left|center"
         android:text=""
-        android:layout_width="0dp"
-        android:layout_weight="1"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent">
 
     </TextView>
-    <TextView
-        android:id="@+id/tv_day"
-        android:gravity="center"
-        android:text=""
+    <LinearLayout
+        android:id="@+id/ll_parent"
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="match_parent">
+        <TextView
+            android:layout_marginLeft="10dp"
+            android:layout_gravity="center"
+            android:background="@drawable/shape_procress"
+            android:id="@+id/tv_day"
+            android:gravity="end"
+            android:text=""
+            android:textSize="10sp"
+            android:layout_width="wrap_content"
+            android:textColor="#ffffff"
+            android:paddingRight="4dp"
+            android:paddingTop="1dp"
+            android:paddingBottom="1dp"
+            android:paddingLeft="4dp"
+            android:layout_height="16dp">
 
-    </TextView>
-    <TextView
-        android:id="@+id/tv_interval"
-        android:gravity="center"
-        android:text=""
-        android:layout_width="0dp"
-        android:layout_weight="1"
+        </TextView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="50dp"
         android:layout_height="match_parent">
-
-    </TextView>
+        <ImageView
+            android:layout_gravity="center"
+            android:src="@drawable/ic_timer_last"
+            android:layout_width="16dp"
+            android:layout_height="16dp"></ImageView>
+        <TextView
+            android:layout_gravity="center"
+            android:id="@+id/tv_interval"
+            android:gravity="center"
+            android:text="a"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+        </TextView>
+    </LinearLayout>
 </LinearLayout>

@@ -4,8 +4,10 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../../layout/custom_preview.xml" value="0.19844124700239807" />
+        <entry key="app/src/main/res/drawable/shape_none.xml" value="0.2685" />
+        <entry key="app/src/main/res/drawable/shape_procress.xml" value="0.2445" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.3390625" />
-        <entry key="app/src/main/res/layout/history_item.xml" value="0.22871376811594202" />
+        <entry key="app/src/main/res/layout/history_item.xml" value="0.33" />
         <entry key="app/src/main/res/layout/listview_header.xml" value="0.3229166666666667" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.187" />
       </map>
